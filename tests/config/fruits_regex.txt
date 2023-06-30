@@ -1,0 +1,3 @@
+\bapple\w*\b
+\bbanana\w*\b
+\bplum\w*\b
