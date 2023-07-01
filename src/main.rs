@@ -1,6 +1,6 @@
 use actix_files as fs;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use anonymize_rs::anonymizer::{AnonymizerPipeline, ReplaceResult};
+use anonymize_rs::anonymizer::{AnonymizePipeline, ReplaceResult};
 use anyhow::Result;
 use bytes::{Bytes, BytesMut};
 use clap::{Parser, Subcommand};
@@ -19,6 +19,7 @@ use tokio::sync::Mutex;
 pub mod anonymizer;
 pub mod error;
 pub mod models;
+pub mod config;
 
 #[derive(Parser)] // requires `derive` feature
 #[command(name = "cargo")]
@@ -64,7 +65,7 @@ pub async fn health() -> impl Responder {
 
 pub async fn anonymize(
     anonymize_request: web::Json<AnonymizeRequest>,
-    anonymizer_pipeline: web::Data<AnonymizerPipeline>,
+    anonymizer_pipeline: web::Data<AnonymizePipeline>,
 ) -> Result<impl Responder, Box<dyn Error>> {
     let resp = ReplaceResult {
         text: "".to_string(),

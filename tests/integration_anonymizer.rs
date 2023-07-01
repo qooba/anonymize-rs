@@ -1,7 +1,20 @@
+use anonymize_rs::{anonymizer::{FlashTextAnonymizer, RegexAnonymizer}, config::AnonymizePipelineConfig};
 use anyhow::Result;
-use anonymize_rs::anonymizer::{FlashTextAnonymizer, RegexAnonymizer};
 
-#[tokio::test]
+#[tokio::main]
+#[test]
+async fn test_config() -> Result<()> {
+    let path = "./tests/config/config.yaml".to_string();
+    let config = AnonymizePipelineConfig::new(&path).await?;
+    println!("{config:?}");
+
+    assert_eq!(config.pipeline.len(), 2);
+    Ok(())
+}
+
+
+#[tokio::main]
+#[test]
 async fn test_flashtext_replace() -> Result<()> {
     let mut flash_text = FlashTextAnonymizer::new();
     flash_text.add_keyword("apple");
@@ -19,8 +32,8 @@ async fn test_flashtext_replace() -> Result<()> {
     Ok(())
 }
 
-#[tokio::test]
-async fn test_flashtest_replace_file() -> Result<()> {
+#[test]
+fn test_flashtest_replace_file() -> Result<()> {
     let mut flash_text = FlashTextAnonymizer::new();
     flash_text.add_keywords_file("./tests/config/fruits.txt")?;
 
@@ -36,8 +49,8 @@ async fn test_flashtest_replace_file() -> Result<()> {
     Ok(())
 }
 
-#[tokio::test]
-async fn test_regex_replace() -> Result<()> {
+#[test]
+fn test_regex_replace() -> Result<()> {
     let mut regex_anonymizer = RegexAnonymizer::new();
     regex_anonymizer.add_regex_pattern(r"\bapple\w*\b")?;
     regex_anonymizer.add_regex_pattern(r"\bbanana\w*\b")?;
@@ -52,8 +65,8 @@ async fn test_regex_replace() -> Result<()> {
     Ok(())
 }
 
-#[tokio::test]
-async fn test_regex_replace_file() -> Result<()> {
+#[test]
+fn test_regex_replace_file() -> Result<()> {
     let mut regex_anonymizer = RegexAnonymizer::new();
     regex_anonymizer.add_regex_patterns_file("./tests/config/fruits_regex.txt")?;
 

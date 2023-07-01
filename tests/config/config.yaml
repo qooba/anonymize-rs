@@ -1,0 +1,7 @@
+pipeline:
+  - kind: flashText
+    name: FRUIT_FLASH
+    file: ./config/fruit.txt
+  - kind: regex
+    name: FRUIT_REGEX
+    file: ./config/fruit_regex.txt

@@ -11,7 +11,7 @@ pub struct ReplaceResult {
     pub items: HashMap<String, String>,
 }
 
-pub struct AnonymizerPipeline {}
+pub struct AnonymizePipeline {}
 
 pub trait Anonymizer {
     fn anonymize(&self, text: &str, replacement: &str) -> ReplaceResult;
