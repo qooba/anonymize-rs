@@ -12,28 +12,48 @@ pub struct ReplaceResult {
     pub items: HashMap<String, String>,
 }
 
-pub trait Anonymizer {
+pub trait Anonymizer : AnonymizerClone {
     fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult>;
 }
 
+pub trait AnonymizerClone {
+    fn clone_box(&self) -> Box<dyn Anonymizer>;
+}
+
+impl<T> AnonymizerClone for T
+where
+    T: 'static + Anonymizer + Clone,
+{
+    fn clone_box(&self) -> Box<dyn Anonymizer> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<dyn Anonymizer> {
+    fn clone(&self) -> Box<dyn Anonymizer> {
+        self.clone_box()
+    }
+}
+
+
+#[derive(Clone)]
 pub struct AnonymizePipeline {
     pub anonymizers: Vec<Box<dyn Anonymizer>>,
 }
 
 impl AnonymizePipeline {
-    pub async fn new(config: &str) -> Result<Self> {
-        let anonymize_config = AnonymizePipelineConfig::new(&config.to_string()).await?;
+    pub fn new(anonymize_config: AnonymizePipelineConfig) -> Result<Self> {
         let mut anonymizers: Vec<Box<dyn Anonymizer>> = vec![];
         for c in anonymize_config.pipeline {
             match c {
                 AnonymizerConfig::FlashText { name, file } => {
                     let mut anonymizer = FlashTextAnonymizer::new(Some(name));
-                    anonymizer.add_keywords_file(&file);
+                    anonymizer.add_keywords_file(&file)?;
                     anonymizers.push(Box::new(anonymizer));
                 }
                 AnonymizerConfig::Regex { name, file } => {
                     let mut anonymizer = RegexAnonymizer::new(Some(name));
-                    anonymizer.add_regex_patterns_file(&file);
+                    anonymizer.add_regex_patterns_file(&file)?;
                     anonymizers.push(Box::new(anonymizer));
                 }
                 AnonymizerConfig::Ner { model_path } => {}
@@ -63,12 +83,13 @@ impl Anonymizer for AnonymizePipeline {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 pub struct TrieNode {
     children: HashMap<char, TrieNode>,
     is_word_end: bool,
 }
 
+#[derive(Debug, Clone)]
 pub struct FlashTextAnonymizer {
     root: TrieNode,
     replacement: Option<String>,
@@ -213,6 +234,7 @@ impl FlashTextAnonymizer {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct RegexAnonymizer {
     regex_patterns: Vec<Regex>,
     replacement: Option<String>,

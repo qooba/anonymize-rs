@@ -1,7 +1,7 @@
 pipeline:
   - kind: flashText
     name: FRUIT_FLASH
-    file: ./tests/config/fruit.txt
+    file: ./tests/config/fruits.txt
   - kind: regex
     name: FRUIT_REGEX
-    file: ./tests/config/fruit_regex.txt
+    file: ./tests/config/fruits_regex.txt
