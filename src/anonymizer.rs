@@ -1,4 +1,5 @@
-use anyhow::Result;
+use crate::config::{AnonymizePipelineConfig, AnonymizerConfig};
+use anyhow::{anyhow, Result};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -11,10 +12,55 @@ pub struct ReplaceResult {
     pub items: HashMap<String, String>,
 }
 
-pub struct AnonymizePipeline {}
-
 pub trait Anonymizer {
-    fn anonymize(&self, text: &str, replacement: &str) -> ReplaceResult;
+    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult>;
+}
+
+pub struct AnonymizePipeline {
+    pub anonymizers: Vec<Box<dyn Anonymizer>>,
+}
+
+impl AnonymizePipeline {
+    pub async fn new(config: &str) -> Result<Self> {
+        let anonymize_config = AnonymizePipelineConfig::new(&config.to_string()).await?;
+        let mut anonymizers: Vec<Box<dyn Anonymizer>> = vec![];
+        for c in anonymize_config.pipeline {
+            match c {
+                AnonymizerConfig::FlashText { name, file } => {
+                    let mut anonymizer = FlashTextAnonymizer::new(Some(name));
+                    anonymizer.add_keywords_file(&file);
+                    anonymizers.push(Box::new(anonymizer));
+                }
+                AnonymizerConfig::Regex { name, file } => {
+                    let mut anonymizer = RegexAnonymizer::new(Some(name));
+                    anonymizer.add_regex_patterns_file(&file);
+                    anonymizers.push(Box::new(anonymizer));
+                }
+                AnonymizerConfig::Ner { model_path } => {}
+            };
+        }
+        Ok(AnonymizePipeline { anonymizers })
+    }
+}
+
+impl Anonymizer for AnonymizePipeline {
+    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
+        let mut replace_result = ReplaceResult {
+            text: text.to_string(),
+            items: HashMap::new(),
+        };
+
+        self.anonymizers
+            .iter()
+            .try_for_each(|anonymizer| -> Result<()> {
+                let result = anonymizer.anonymize(&replace_result.text, replacement)?;
+                replace_result.text = result.text;
+                replace_result.items.extend(result.items);
+                Ok(())
+            });
+
+        Ok(replace_result)
+    }
 }
 
 #[derive(Default)]
@@ -25,6 +71,7 @@ pub struct TrieNode {
 
 pub struct FlashTextAnonymizer {
     root: TrieNode,
+    replacement: Option<String>,
 }
 
 impl TrieNode {
@@ -37,9 +84,10 @@ impl TrieNode {
 }
 
 impl FlashTextAnonymizer {
-    pub fn new() -> Self {
+    pub fn new(replacement: Option<String>) -> Self {
         FlashTextAnonymizer {
             root: TrieNode::new(),
+            replacement,
         }
     }
 
@@ -55,16 +103,17 @@ impl FlashTextAnonymizer {
         Ok(())
     }
 
-    pub fn add_keyword(&mut self, word: &str) {
+    pub fn add_keyword(&mut self, word: &str) -> Result<()> {
         let mut node = &mut self.root;
 
         for ch in word.chars() {
             node = node.children.entry(ch).or_insert_with(TrieNode::new);
         }
         node.is_word_end = true;
+        Ok(())
     }
 
-    pub fn replace_keywords(&self, text: &str, replacement: &str) -> ReplaceResult {
+    pub fn replace_keywords(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
         let mut internal_text = text.to_string();
         internal_text.push_str("  ");
         let mut result = String::new();
@@ -74,10 +123,16 @@ impl FlashTextAnonymizer {
         let mut items = HashMap::new();
         let mut idx = 0;
 
+        let base_replacement = if replacement.is_some() {
+            replacement.ok_or(anyhow!("SET REPLACEMENT"))?.to_string()
+        } else {
+            self.replacement.clone().ok_or(anyhow!("SET REPLACEMENT"))?
+        };
+
         while let Some((match_start, ch)) = ch_indices.next() {
             if let Some(_word) = self.traverse_trie(match_start, ch, &mut ch_indices) {
                 result.push_str(&internal_text[start..match_start]);
-                let mut rep = replacement.to_string();
+                let mut rep = base_replacement.to_string();
                 rep.push_str(&idx.to_string());
                 result.push_str(&rep);
                 start = self.skip_to_word_boundary(
@@ -92,10 +147,10 @@ impl FlashTextAnonymizer {
         result.push_str(&internal_text[start..]);
         result.pop();
 
-        ReplaceResult {
+        Ok(ReplaceResult {
             text: result,
             items,
-        }
+        })
     }
 
     pub fn find_keywords(&self, text: &str) -> Vec<String> {
@@ -117,7 +172,7 @@ impl FlashTextAnonymizer {
         let mut end = start + ch.len_utf8();
         let mut chars = vec![ch];
 
-        while let Some((next_start, next_ch)) = ch_indices.next() {
+        for (next_start, next_ch) in ch_indices.by_ref() {
             if let Some(next_node) = node.children.get(&next_ch) {
                 chars.push(next_ch);
                 end = next_start + next_ch.len_utf8();
@@ -139,7 +194,7 @@ impl FlashTextAnonymizer {
         I: Iterator<Item = (usize, char)>,
     {
         let mut end = start;
-        while let Some((next_start, _)) = ch_indices.next() {
+        for (next_start, _) in ch_indices.by_ref() {
             if self.is_word_boundary(text, next_start) {
                 end = next_start;
                 break;
@@ -158,20 +213,16 @@ impl FlashTextAnonymizer {
     }
 }
 
-impl Default for FlashTextAnonymizer {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 pub struct RegexAnonymizer {
     regex_patterns: Vec<Regex>,
+    replacement: Option<String>,
 }
 
 impl RegexAnonymizer {
-    pub fn new() -> Self {
+    pub fn new(replacement: Option<String>) -> Self {
         RegexAnonymizer {
             regex_patterns: Vec::new(),
+            replacement,
         }
     }
 
@@ -187,21 +238,31 @@ impl RegexAnonymizer {
         Ok(())
     }
 
-    pub fn add_regex_pattern(&mut self, pattern: &str) -> Result<(), regex::Error> {
+    pub fn add_regex_pattern(&mut self, pattern: &str) -> Result<()> {
         let regex = Regex::new(pattern)?;
         self.regex_patterns.push(regex);
         Ok(())
     }
 
-    pub fn replace_regex_matches(&self, text: &str, replacement: &str) -> ReplaceResult {
+    pub fn replace_regex_matches(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+    ) -> Result<ReplaceResult> {
         let mut result = text.to_string();
         let mut items = HashMap::new();
         let mut idx = 0;
 
+        let base_replacement = if replacement.is_some() {
+            replacement.ok_or(anyhow!("SET REPLACEMENT"))?.to_string()
+        } else {
+            self.replacement.clone().ok_or(anyhow!("SET REPLACEMENT"))?
+        };
+
         for pattern in &self.regex_patterns {
             let mut it = pattern.find_iter(&result).enumerate().peekable();
-            if !it.peek().is_none() {
-                let mut rep = replacement.to_string();
+            if it.peek().is_some() {
+                let mut rep = base_replacement.to_string();
                 rep.push_str(&idx.to_string());
                 let mut new = String::with_capacity(result.len());
                 let mut last_match = 0;
@@ -219,27 +280,21 @@ impl RegexAnonymizer {
             }
         }
 
-        ReplaceResult {
+        Ok(ReplaceResult {
             text: result,
             items,
-        }
-    }
-}
-
-impl Default for RegexAnonymizer {
-    fn default() -> Self {
-        Self::new()
+        })
     }
 }
 
 impl Anonymizer for FlashTextAnonymizer {
-    fn anonymize(&self, text: &str, replacement: &str) -> ReplaceResult {
+    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
         self.replace_keywords(text, replacement)
     }
 }
 
 impl Anonymizer for RegexAnonymizer {
-    fn anonymize(&self, text: &str, replacement: &str) -> ReplaceResult {
+    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
         self.replace_regex_matches(text, replacement)
     }
 }
