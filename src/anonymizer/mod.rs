@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 pub mod flashtext_anonymizer;
 pub mod regex_anonymizer;
+pub mod ner_anonymizer;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ReplaceResult {
