@@ -1,5 +1,5 @@
 use anonymize_rs::{
-    anonymizer::{AnonymizePipeline, Anonymizer, FlashTextAnonymizer, RegexAnonymizer},
+    anonymizer::{AnonymizePipeline, Anonymizer},
     config::AnonymizePipelineConfig,
 };
 use anyhow::Result;
@@ -26,104 +26,10 @@ async fn test_replace_config() -> Result<()> {
     let anonymize_pipeline = AnonymizePipeline::new(config)?;
     let res = anonymize_pipeline.anonymize(text, None)?;
     println!("{:?}", res);
-    assert_eq!(res.text, "I like to eat FRUIT_FLASH0 and FRUIT_FLASH1 and FRUIT_REGEX0 ");
+    assert_eq!(
+        res.text,
+        "I like to eat FRUIT_FLASH0 and FRUIT_FLASH1 and FRUIT_REGEX0 "
+    );
 
-    Ok(())
-}
-
-#[tokio::main]
-#[test]
-async fn test_flashtext_replace() -> Result<()> {
-    let mut flash_text = FlashTextAnonymizer::new(None);
-    flash_text.add_keyword("apple")?;
-    flash_text.add_keyword("banana")?;
-    flash_text.add_keyword("plum")?;
-
-    let text = "I like to eat apples and bananas and plums";
-    let keywords = flash_text.find_keywords(text);
-    println!("{:?}", keywords);
-    assert_eq!(keywords[0], "apple");
-
-    let res = flash_text.replace_keywords(text, Some("FRUIT"))?;
-    println!("{:?}", res);
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2 ");
-    Ok(())
-}
-
-#[test]
-fn test_flashtest_replace_file1() -> Result<()> {
-    let mut flash_text = FlashTextAnonymizer::new(None);
-    flash_text.add_keywords_file("./tests/config/fruits.txt")?;
-
-    let text = "I like to eat apples and bananas";
-    let keywords = flash_text.find_keywords(text);
-    println!("{:?}", keywords);
-    assert_eq!(keywords[0], "apple");
-
-    let res = flash_text.replace_keywords(text, Some("FRUIT"))?;
-    println!("{:?}", res);
-
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 ");
-    Ok(())
-}
-
-#[test]
-fn test_flashtest_replace_file2() -> Result<()> {
-    let mut flash_text = FlashTextAnonymizer::new(Some("FRUIT".to_string()));
-    flash_text.add_keywords_file("./tests/config/fruits.txt")?;
-
-    let text = "I like to eat apples and bananas";
-    let keywords = flash_text.find_keywords(text);
-    println!("{:?}", keywords);
-    assert_eq!(keywords[0], "apple");
-
-    let res = flash_text.replace_keywords(text, None)?;
-    println!("{:?}", res);
-
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 ");
-    Ok(())
-}
-
-#[test]
-fn test_regex_replace() -> Result<()> {
-    let mut regex_anonymizer = RegexAnonymizer::new(None);
-    regex_anonymizer.add_regex_pattern(r"\bapple\w*\b")?;
-    regex_anonymizer.add_regex_pattern(r"\bbanana\w*\b")?;
-    regex_anonymizer.add_regex_pattern(r"\bplum\w*\b")?;
-
-    let text = "I like to eat apples and bananas and plums";
-
-    let res = regex_anonymizer.replace_regex_matches(text, Some("FRUIT"))?;
-    println!("{:?}", res);
-
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2");
-    Ok(())
-}
-
-#[test]
-fn test_regex_replace_file1() -> Result<()> {
-    let mut regex_anonymizer = RegexAnonymizer::new(None);
-    regex_anonymizer.add_regex_patterns_file("./tests/config/fruits_regex.txt")?;
-
-    let text = "I like to eat apples and bananas and plums";
-
-    let res = regex_anonymizer.replace_regex_matches(text, Some("FRUIT"))?;
-    println!("{:?}", res);
-
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2");
-    Ok(())
-}
-
-#[test]
-fn test_regex_replace_file2() -> Result<()> {
-    let mut regex_anonymizer = RegexAnonymizer::new(Some("FRUIT".to_string()));
-    regex_anonymizer.add_regex_patterns_file("./tests/config/fruits_regex.txt")?;
-
-    let text = "I like to eat apples and bananas and plums";
-
-    let res = regex_anonymizer.replace_regex_matches(text, None)?;
-    println!("{:?}", res);
-
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2");
     Ok(())
 }

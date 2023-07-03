@@ -15,3 +15,10 @@ Cargo.lock
 *.pdb
 tests/db/
 .vscode
+examples/clarin-pl
+examples/xlm-ner
+examples/xlm-ner-quantized
+examples/xlm-ner-transformers
+
+
+

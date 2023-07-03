@@ -23,3 +23,6 @@ regex = "1.8.4"
 url = "2.4.0"
 thiserror = "1.0"
 reqwest = { version = "0.11", features = ["json"] }
+tract-onnx = "0.20.7"
+tokenizers = "0.13.3"
+ndarray = "0.15.6"

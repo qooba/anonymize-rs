@@ -82,8 +82,8 @@ pub struct AnonymizePipelineConfig {
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 #[serde(tag = "kind", rename_all = "camelCase")]
 pub enum AnonymizerConfig {
-    FlashText { name: String, file: String },
-    Regex { name: String, file: String },
+    FlashText { name: String, file: Option<String>, keywords: Option<Vec<String>> },
+    Regex { name: String, file: Option<String>, patterns: Option<Vec<String>> },
     Ner { model_path: String },
 }
 
