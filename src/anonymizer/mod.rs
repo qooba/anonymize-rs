@@ -97,7 +97,7 @@ impl Anonymizer for AnonymizePipeline {
                 replace_result.text = result.text;
                 replace_result.items.extend(result.items);
                 Ok(())
-            });
+            })?;
 
         Ok(replace_result)
     }

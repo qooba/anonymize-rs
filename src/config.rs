@@ -2,7 +2,6 @@ use anyhow::{anyhow, Result};
 use regex::Regex;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::env;
 use std::fs;
 use url::Url;

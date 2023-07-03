@@ -84,7 +84,7 @@ impl FlashTextAnonymizer {
     pub fn find_keywords(&self, text: &str) -> Vec<String> {
         let mut result = Vec::new();
         let mut ch_indices = text.char_indices();
-        while let Some((start, ch)) = ch_indices.next() {
+        while let Some((_start, ch)) = ch_indices.next() {
             if let Some(word) = self.traverse_trie(ch, &mut ch_indices) {
                 result.push(word);
             }
