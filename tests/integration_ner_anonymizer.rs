@@ -20,7 +20,8 @@ fn test_ner_replace() -> Result<()> {
 
     let ner_anonymizer = NerAnonymizer::new(model_path, tokenizer_path, id2label, Some(true))?;
 
-    let text = "Jan Kowalski mieszka w Krakowie na ulicy Warszawskiej. Jego numer telefonu to 555555555.";
+    let text =
+        "Jan Kowalski mieszka w Krakowie na ulicy Warszawskiej. Jego numer telefonu to 555555555.";
 
     let res = ner_anonymizer.replace_matches(text, None)?;
     println!("{:?}", res);

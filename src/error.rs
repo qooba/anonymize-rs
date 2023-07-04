@@ -6,7 +6,6 @@ pub enum LLMError {
     #[error("User exists")]
     UserExists,
 
-     #[error("Login error")]
+    #[error("Login error")]
     UserLoginError,
-
 }

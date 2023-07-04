@@ -1,6 +1,6 @@
-use crate::anonymizer::TrieNode;
-use crate::anonymizer::ReplaceResult;
 use crate::anonymizer::Anonymizer;
+use crate::anonymizer::ReplaceResult;
+use crate::anonymizer::TrieNode;
 use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 use std::fs::File;
@@ -24,9 +24,7 @@ impl FlashTextAnonymizer {
         let file = File::open(path)?;
         io::BufReader::new(file)
             .lines()
-            .try_for_each(|word| -> Result<()> {
-                self.add_keyword(&word?)
-            })?;
+            .try_for_each(|word| -> Result<()> { self.add_keyword(&word?) })?;
 
         Ok(())
     }
