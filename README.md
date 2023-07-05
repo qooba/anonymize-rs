@@ -1,14 +1,9 @@
-# `llm`-ui - Large Language Models Web interface
-
-Simple web ui for [llm](https://github.com/rustformers/llm) library.
-
-![LLM UI in action](./docs/llm-ui.gif)
+# anonymize-rs - ner, regex, flash text anonymizer
 
 ## Run application
 
-Download selected model from:
-https://huggingface.co/rustformers
-
+Find selected ner model on:
+https://huggingface.co/models?pipeline_tag=token-classification&library=transformers&sort=trending
 
 ```
 git clone https://github.com/qooba/llm-ui
