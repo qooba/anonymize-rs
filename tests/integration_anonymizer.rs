@@ -26,7 +26,6 @@ async fn test_config_ner() -> Result<()> {
     Ok(())
 }
 
-
 #[tokio::main]
 #[test]
 async fn test_replace_config() -> Result<()> {

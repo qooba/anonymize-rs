@@ -32,7 +32,8 @@ async fn test_ner_replace() -> Result<()> {
         panic!("WRONG CONFIG");
     };
 
-    let ner_anonymizer = NerAnonymizer::new(model_path, tokenizer_path, id2label.clone(), Some(true))?;
+    let ner_anonymizer =
+        NerAnonymizer::new(model_path, tokenizer_path, id2label.clone(), Some(true))?;
 
     let text =
         "Jan Kowalski mieszka w Krakowie na ulicy Warszawskiej. Jego numer telefonu to 555555555.";

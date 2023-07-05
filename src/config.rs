@@ -95,7 +95,7 @@ pub enum AnonymizerConfig {
     Ner {
         model_path: String,
         tokenizer_path: String,
-        id2label: HashMap<String, (String,bool)>,
+        id2label: HashMap<String, (String, bool)>,
         token_type_ids_included: Option<bool>,
     },
 }
