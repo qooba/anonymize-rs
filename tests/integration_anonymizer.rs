@@ -17,6 +17,18 @@ async fn test_config() -> Result<()> {
 
 #[tokio::main]
 #[test]
+async fn test_config_ner() -> Result<()> {
+    let path = "./tests/config/config_ner.yaml".to_string();
+    let config = AnonymizePipelineConfig::new(&path).await?;
+    println!("{config:?}");
+
+    assert_eq!(config.pipeline.len(), 1);
+    Ok(())
+}
+
+
+#[tokio::main]
+#[test]
 async fn test_replace_config() -> Result<()> {
     let path = "./tests/config/config.yaml".to_string();
 

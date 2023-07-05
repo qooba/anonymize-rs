@@ -2,6 +2,7 @@ use anyhow::{anyhow, Result};
 use regex::Regex;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::env;
 use std::fs;
 use url::Url;
@@ -93,6 +94,9 @@ pub enum AnonymizerConfig {
     },
     Ner {
         model_path: String,
+        tokenizer_path: String,
+        id2label: HashMap<String, (String,bool)>,
+        token_type_ids_included: Option<bool>,
     },
 }
 
