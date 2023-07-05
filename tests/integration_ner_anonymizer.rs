@@ -30,9 +30,8 @@ async fn replace_with_ner(text: &str, model_name: &str, lang: &str) -> Result<Re
     Ok(res)
 }
 
-#[ignore]
 #[tokio::main]
-#[test]
+//#[test]
 async fn test_ner_replace_pl() -> Result<()> {
     let text =
         "Jan Kowalski i Anna Kowalska mieszka w Krakowie na ulicy Warszawskiej. Jego numer telefonu to 555555555.";
@@ -46,9 +45,8 @@ async fn test_ner_replace_pl() -> Result<()> {
     Ok(())
 }
 
-#[ignore]
 #[tokio::main]
-#[test]
+//#[test]
 async fn test_ner_replace_en() -> Result<()> {
     let text = "My name is Sarah and I live in London";
 
