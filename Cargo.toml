@@ -26,3 +26,4 @@ reqwest = { version = "0.11", features = ["json"] }
 tract-onnx = "0.20.7"
 tokenizers = "0.13.3"
 ndarray = "0.15.6"
+env_logger = "0.10.0"

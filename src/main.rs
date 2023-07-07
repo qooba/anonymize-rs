@@ -1,5 +1,6 @@
 use actix_files as fs;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::middleware::Logger;
 use anonymize_rs::anonymizer::{AnonymizePipeline, Anonymizer, ReplaceResult};
 use anonymize_rs::config::AnonymizePipelineConfig;
 use anyhow::Result;
@@ -102,6 +103,8 @@ async fn main() -> std::io::Result<()> {
                 .await
                 .unwrap();
 
+            let log_level = "debug";
+            env_logger::init_from_env(env_logger::Env::new().default_filter_or(log_level));
             HttpServer::new(move || {
                 App::new()
                     .app_data(web::Data::new(
@@ -110,6 +113,7 @@ async fn main() -> std::io::Result<()> {
                     .route("/api/anonymize", web::post().to(anonymize_post))
                     .route("/api/anonymize", web::get().to(anonymize_get))
                     .route("/api/deanonymize", web::post().to(deanonymize))
+                    .wrap(Logger::default())
             })
             .bind((host, port))?
             .run()
