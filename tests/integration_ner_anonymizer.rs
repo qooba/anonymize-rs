@@ -1,8 +1,5 @@
 use anonymize_rs::{
-    anonymizer::{
-        ner_anonymizer::{self, NerAnonymizer},
-        ReplaceResult,
-    },
+    anonymizer::ner_anonymizer::NerAnonymizer,
     config::{AnonymizePipelineConfig, AnonymizerConfig},
 };
 use anyhow::Result;

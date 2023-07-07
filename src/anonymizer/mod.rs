@@ -17,6 +17,14 @@ pub struct ReplaceResult {
 
 pub trait Anonymizer: AnonymizerClone {
     fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult>;
+
+    fn deanonymize(&self, input: ReplaceResult) -> String {
+        let mut result = input.text;
+        for (keyword, replacement) in input.items {
+            result = result.replace(&keyword, &replacement);
+        }
+        result
+    }
 }
 
 pub trait AnonymizerClone {

@@ -73,10 +73,9 @@ pub async fn anonymize_get(
 
 pub async fn deanonymize(
     anonymize_request: web::Json<ReplaceResult>,
+    anonymizer_pipeline: web::Data<AnonymizePipeline>,
 ) -> Result<impl Responder, Box<dyn Error>> {
-    let resp = DeAnonymizeResponse {
-        text: "".to_string(),
-    };
+    let resp = anonymizer_pipeline.deanonymize(anonymize_request.0);
     Ok(web::Json(resp))
 }
 

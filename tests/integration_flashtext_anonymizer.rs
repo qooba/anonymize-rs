@@ -1,4 +1,4 @@
-use anonymize_rs::anonymizer::flashtext_anonymizer::FlashTextAnonymizer;
+use anonymize_rs::anonymizer::{flashtext_anonymizer::FlashTextAnonymizer, Anonymizer};
 use anyhow::Result;
 
 #[tokio::main]
@@ -27,8 +27,10 @@ async fn test_flashtext_replace() -> Result<()> {
         assert_eq!(keywords[0], "apple");
 
         let res = flash_text.replace_keywords(text, Some("FRUIT"))?;
-        println!("{:?}", res);
-        assert_eq!(res.text, test_case.1);
+        assert_eq!(&res.text, &test_case.1);
+
+        let d_res = flash_text.deanonymize(res);
+        assert_eq!(d_res, test_case.0);
     }
     Ok(())
 }
