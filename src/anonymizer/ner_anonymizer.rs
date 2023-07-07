@@ -1,24 +1,17 @@
 use crate::anonymizer::{Anonymizer, ReplaceResult};
 use anyhow::{anyhow, Result};
-use ndarray::s;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fs::File;
-use std::hash::Hash;
-use std::io::BufReader;
+use std::path::Path;
 use std::time::Instant;
-use std::{
-    path::{Path, PathBuf},
-    str::FromStr,
-};
 use tokenizers::tokenizer::Tokenizer;
 use tract_ndarray::Axis;
-use tract_onnx::prelude::tract_itertools::enumerate;
 use tract_onnx::prelude::*;
+
+type NerModel = SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>;
 
 #[derive(Debug, Clone)]
 pub struct NerAnonymizer {
-    model: SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>,
+    model: NerModel,
     tokenizer: Tokenizer,
     id2label: HashMap<String, (String, bool)>,
     token_type_ids_included: Option<bool>,

@@ -9,14 +9,27 @@ async fn test_flashtext_replace() -> Result<()> {
     flash_text.add_keyword("banana")?;
     flash_text.add_keyword("plum")?;
 
-    let text = "I like to eat apples and bananas and plums";
-    let keywords = flash_text.find_keywords(text);
-    println!("{:?}", keywords);
-    assert_eq!(keywords[0], "apple");
+    let test_cases = [
+        (
+            "I like to eat apples and bananas and plums",
+            "I like to eat FRUIT0 and FRUIT1 and FRUIT2",
+        ),
+        (
+            "{\"content\": \"I like to eat apples and bananas and plums\"}",
+            "{\"content\": \"I like to eat FRUIT0 and FRUIT1 and FRUIT2\"}",
+        ),
+    ];
 
-    let res = flash_text.replace_keywords(text, Some("FRUIT"))?;
-    println!("{:?}", res);
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2 ");
+    for test_case in test_cases {
+        let text = test_case.0;
+        let keywords = flash_text.find_keywords(text);
+        println!("{:?}", keywords);
+        assert_eq!(keywords[0], "apple");
+
+        let res = flash_text.replace_keywords(text, Some("FRUIT"))?;
+        println!("{:?}", res);
+        assert_eq!(res.text, test_case.1);
+    }
     Ok(())
 }
 
@@ -33,7 +46,7 @@ fn test_flashtest_replace_file1() -> Result<()> {
     let res = flash_text.replace_keywords(text, Some("FRUIT"))?;
     println!("{:?}", res);
 
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 ");
+    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1");
     Ok(())
 }
 
@@ -50,6 +63,6 @@ fn test_flashtest_replace_file2() -> Result<()> {
     let res = flash_text.replace_keywords(text, None)?;
     println!("{:?}", res);
 
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 ");
+    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1");
     Ok(())
 }

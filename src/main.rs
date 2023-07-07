@@ -1,22 +1,12 @@
-use actix_files as fs;
 use actix_web::middleware::Logger;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use anonymize_rs::anonymizer::{AnonymizePipeline, Anonymizer, ReplaceResult};
 use anonymize_rs::config::AnonymizePipelineConfig;
 use anyhow::Result;
-use bytes::{Bytes, BytesMut};
-use clap::{Parser, Subcommand};
+use clap::Parser;
 use models::{AnonymizeRequest, DeAnonymizeResponse};
-use once_cell::sync::OnceCell;
-use std::collections::HashMap;
 use std::error::Error;
 use std::io::{self, BufRead};
-use std::path::PathBuf;
-use std::sync::mpsc::{sync_channel, SyncSender};
-use std::sync::Arc;
-use std::thread;
-use tokio::sync::mpsc::{channel, Receiver};
-use tokio::sync::Mutex;
 
 pub mod anonymizer;
 pub mod config;
@@ -119,8 +109,11 @@ async fn main() -> std::io::Result<()> {
             .run()
             .await
         }
-        AnonymizeCli::File(file_args) => Ok(()),
-        AnonymizeCli::Stdin(stdin_args) => {
+        AnonymizeCli::File(_file_args) => {
+            todo!("FEATURE TO IMPLEMENT");
+        }
+        AnonymizeCli::Stdin(_stdin_args) => {
+            todo!("FEATURE TO IMPLEMENT");
             let stdin = io::stdin();
             let mut lines = stdin.lock().lines();
 

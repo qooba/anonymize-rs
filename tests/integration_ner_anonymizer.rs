@@ -1,10 +1,13 @@
 use anonymize_rs::{
-    anonymizer::{ner_anonymizer::NerAnonymizer, ReplaceResult},
+    anonymizer::{
+        ner_anonymizer::{self, NerAnonymizer},
+        ReplaceResult,
+    },
     config::{AnonymizePipelineConfig, AnonymizerConfig},
 };
 use anyhow::Result;
 
-async fn replace_with_ner(text: &str, model_name: &str, lang: &str) -> Result<ReplaceResult> {
+async fn create_anonymizer(model_name: &str, lang: &str) -> Result<NerAnonymizer> {
     let model_path = format!("./examples/{model_name}/model.onnx").to_string();
     let tokenizer_path = format!("./examples/{model_name}/tokenizer.json").to_string();
 
@@ -25,24 +28,29 @@ async fn replace_with_ner(text: &str, model_name: &str, lang: &str) -> Result<Re
     let ner_anonymizer =
         NerAnonymizer::new(model_path, tokenizer_path, id2label.clone(), Some(true))?;
 
-    let res = ner_anonymizer.replace_matches(text, None)?;
-
-    Ok(res)
+    Ok(ner_anonymizer)
 }
 
 #[tokio::main]
 #[test]
 #[ignore]
 async fn test_ner_replace_pl() -> Result<()> {
-    let text =
-        "Jan Kowalski i Anna Kowalska mieszka w Krakowie na ulicy Warszawskiej. Jego numer telefonu to 555555555.";
+    let test_cases = [
+        ("Jan Kowalski i Anna Kowalska mieszka w Krakowie na ulicy Warszawskiej.",
+         "B-nam_liv_person0 I-nam_liv_person0 i B-nam_liv_person1 I-nam_liv_person1 mieszka w B-nam_loc_gpe_city0 na ulicy B-nam_fac_road0."),
+        ("{\"content\": \"Jan Kowalski i Anna Kowalska mieszka w Krakowie na ulicy Warszawskiej.\"}",
+         "{\"content\": \"B-nam_liv_person0 I-nam_liv_person0 i B-nam_liv_person1 I-nam_liv_person1 mieszka w B-nam_loc_gpe_city0 na ulicy B-nam_fac_road0.\"}")
+    ];
 
     let model_name = "clarin-pl";
     let lang = "pl";
-    let res = replace_with_ner(text, model_name, lang).await?;
-    println!("{:?}", res);
+    let ner_anonymizer = create_anonymizer(model_name, lang).await?;
 
-    //assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2");
+    for test_case in test_cases {
+        let text = test_case.0;
+        let res = ner_anonymizer.replace_matches(text, None)?;
+        assert_eq!(res.text, test_case.1);
+    }
     Ok(())
 }
 
@@ -50,13 +58,23 @@ async fn test_ner_replace_pl() -> Result<()> {
 #[test]
 #[ignore]
 async fn test_ner_replace_en() -> Result<()> {
-    let text = "My name is Sarah and I live in London";
-
+    let test_cases = [
+        (
+            "My name is Sarah and I live in London",
+            "My name is B-PER0 and I live in B-LOC0",
+        ),
+        (
+            "{\"content\":\"My name is Sarah and I live in London\"}",
+            "{\"content\":\"My name is B-PER0 and I live in B-LOC0\"}",
+        ),
+    ];
     let model_name = "dslim";
     let lang = "en";
-    let res = replace_with_ner(text, model_name, lang).await?;
-    println!("{:?}", res);
-
-    //assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2");
+    let ner_anonymizer = create_anonymizer(model_name, lang).await?;
+    for test_case in test_cases {
+        let text = test_case.0;
+        let res = ner_anonymizer.replace_matches(text, None)?;
+        assert_eq!(res.text, test_case.1);
+    }
     Ok(())
 }

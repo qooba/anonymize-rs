@@ -72,6 +72,7 @@ impl FlashTextAnonymizer {
         }
         result.push_str(&internal_text[start..]);
         result.pop();
+        result.pop();
 
         Ok(ReplaceResult {
             text: result,
