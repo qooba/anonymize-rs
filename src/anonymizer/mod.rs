@@ -1,12 +1,13 @@
 use crate::anonymizer::flashtext_anonymizer::FlashTextAnonymizer;
+use crate::anonymizer::ner_anonymizer::NerAnonymizer;
 use crate::anonymizer::regex_anonymizer::RegexAnonymizer;
 use crate::config::{AnonymizePipelineConfig, AnonymizerConfig};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 pub mod flashtext_anonymizer;
-pub mod regex_anonymizer;
 pub mod ner_anonymizer;
+pub mod regex_anonymizer;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ReplaceResult {
@@ -77,7 +78,20 @@ impl AnonymizePipeline {
                     };
                     anonymizers.push(Box::new(anonymizer));
                 }
-                AnonymizerConfig::Ner { model_path } => {}
+                AnonymizerConfig::Ner {
+                    model_path,
+                    tokenizer_path,
+                    id2label,
+                    token_type_ids_included,
+                } => {
+                    let anonymizer = NerAnonymizer::new(
+                        model_path,
+                        tokenizer_path,
+                        id2label,
+                        token_type_ids_included,
+                    )?;
+                    anonymizers.push(Box::new(anonymizer));
+                }
             };
         }
         Ok(AnonymizePipeline { anonymizers })

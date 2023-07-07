@@ -20,7 +20,7 @@ use tract_onnx::prelude::*;
 pub struct NerAnonymizer {
     model: SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>,
     tokenizer: Tokenizer,
-    id2label: HashMap<String, String>,
+    id2label: HashMap<String, (String, bool)>,
     token_type_ids_included: Option<bool>,
 }
 
@@ -28,7 +28,7 @@ impl NerAnonymizer {
     pub fn new(
         model_path: String,
         tokenizer_path: String,
-        id2label: HashMap<String, String>,
+        id2label: HashMap<String, (String, bool)>,
         token_type_ids_included: Option<bool>,
     ) -> Result<Self> {
         let now = Instant::now();
@@ -113,11 +113,11 @@ impl NerAnonymizer {
                     .max_by(|(_, a), (_, b)| a.total_cmp(b))
                     .map(|(index, _)| index)
                     .unwrap();
-                let label = id2label[&label_indices.to_string()].to_string();
-                if label != "O" {
+                let label = id2label[&label_indices.to_string()].clone();
+                if label.1 {
                     let offset = offsets[i];
                     if offset.0 != offset.1 {
-                        replacements.push((offset.0, offset.1, label));
+                        replacements.push((offset.0, offset.1, label.0));
                     }
                 }
                 //dbg!(r4);
