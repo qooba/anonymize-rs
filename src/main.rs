@@ -1,6 +1,6 @@
 use actix_files as fs;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use actix_web::middleware::Logger;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use anonymize_rs::anonymizer::{AnonymizePipeline, Anonymizer, ReplaceResult};
 use anonymize_rs::config::AnonymizePipelineConfig;
 use anyhow::Result;
