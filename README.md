@@ -43,5 +43,12 @@ cargo run -- server --host 0.0.0.0 --port 8089 --config tests/config/config.yaml
 
 Open: http://localhost:8089/index.html
 
+```
+docker build -t qooba/anonymize-rs -f docker/Dockerfile .
+```
+
+```
+curl -X POST "http://localhost:8080/post" -H "accept: application/json" -H "Content-Type: application/json" -d '{"content":"I like to eat apples and bananas and plums"}'
+```
 
 ⚠️ Note on Data Protection: library can help identify sensitive/PII data in un/structured text. However, it uses automated detection mechanisms, and there is no guarantee that it will find all sensitive information. Consequently, additional systems and protections should be employed. This tool is meant to be a part of your privacy protection suite, not the entirety of it. Always ensure your data protection measures are comprehensive and multi-layered.
