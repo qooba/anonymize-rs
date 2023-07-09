@@ -4,7 +4,7 @@ use anonymize_rs::anonymizer::{AnonymizePipeline, Anonymizer, ReplaceResult};
 use anonymize_rs::config::AnonymizePipelineConfig;
 use anyhow::Result;
 use clap::Parser;
-use models::{AnonymizeRequest, DeAnonymizeResponse};
+use models::AnonymizeRequest;
 use std::error::Error;
 use std::io::{self, BufRead};
 

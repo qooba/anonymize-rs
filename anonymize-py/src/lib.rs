@@ -20,7 +20,7 @@ fn rusty_module(py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyclass]
     pub struct RustyClass {
-        ner: NerAnonymizer
+        ner: NerAnonymizer,
     }
 
     #[pymethods]
