@@ -2,6 +2,7 @@ pipeline:
   - kind: ner
     model_path: ./examples/clarin-pl/model.onnx
     tokenizer_path: ./examples/clarin-pl/tokenizer.json
+    token_type_ids_included: true
     id2label:
       "0": ["B-nam_adj", false]  
       "1": ["B-nam_adj_city" , true]  
