@@ -2,6 +2,7 @@ pipeline:
   - kind: ner
     model_path: ./examples/dslim/model.onnx
     tokenizer_path: ./examples/dslim/tokenizer.json
+    token_type_ids_included: true
     id2label:
       "0": ["O", false]
       "1": ["B-MISC", true]

@@ -49,6 +49,8 @@ struct ServerArgs {
     host: String,
     #[arg(long, short = 'p')]
     port: u16,
+    #[arg(long, short = 'l')]
+    loglevel: Option<String>,
 }
 
 pub async fn health() -> impl Responder {
@@ -92,7 +94,10 @@ async fn main() -> std::io::Result<()> {
                 .await
                 .unwrap();
 
-            let log_level = "debug";
+            let log_level = match server_args.loglevel {
+                Some(l) => l,
+                None => "info".to_string(),
+            };
             env_logger::init_from_env(env_logger::Env::new().default_filter_or(log_level));
             HttpServer::new(move || {
                 App::new()

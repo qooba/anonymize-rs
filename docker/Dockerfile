@@ -4,7 +4,7 @@ RUN rustup target add x86_64-unknown-linux-musl
 
 RUN USER=root cargo new anonymize-rs
 WORKDIR /usr/src/anonymize-rs
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml ./
 
 RUN apt update && apt install musl-tools musl-dev -yq
 RUN cargo build --release
@@ -17,4 +17,4 @@ RUN cargo install --target x86_64-unknown-linux-musl --path .
 FROM scratch
 COPY --from=builder /usr/local/cargo/bin/anonymize_rs .
 USER 1000
-CMD ["./anonymize_rs", "server", "--host", "0.0.0.0", "--port", "8080", "--config", "config.yaml"]
+ENTRYPOINT ["./anonymize_rs"]
