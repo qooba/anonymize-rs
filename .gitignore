@@ -15,6 +15,7 @@ Cargo.lock
 *.pdb
 tests/db/
 .vscode
+.env
 examples/clarin-pl
 examples/xlm-ner
 examples/xlm-ner-quantized

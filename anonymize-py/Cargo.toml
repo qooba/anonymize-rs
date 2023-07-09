@@ -1,5 +1,5 @@
 [package]
-name = "anonymize-py"
+name = "anonymize-rs-py"
 version = "0.0.1"
 edition = "2021"
 repository = "https://github.com/qooba/anonymize-rs"
@@ -7,7 +7,7 @@ description = "anonymize-rs"
 license = "Apache-2.0"
 
 [lib]
-name = "anonymize_py"
+name = "anonymizers"
 crate-type = ["cdylib"]
 
 [build]
