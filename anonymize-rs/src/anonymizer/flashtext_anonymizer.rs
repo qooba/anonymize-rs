@@ -75,7 +75,8 @@ impl FlashTextAnonymizer {
                     match_start + ch.len_utf8(),
                     &mut ch_indices,
                 );
-                let item_value = internal_text[match_start..start].to_string();
+                let (item_value, addition) =
+                    self.process_item_value(&internal_text[match_start..start]);
                 let existing_item = items.iter().find(|(_, v)| *v == &item_value);
                 match existing_item {
                     Some((k, _v)) => {
@@ -88,6 +89,7 @@ impl FlashTextAnonymizer {
                 }
 
                 result.push_str(&rep);
+                result.push_str(&addition);
             }
         }
         result.push_str(&internal_text[start..]);
@@ -97,6 +99,14 @@ impl FlashTextAnonymizer {
             text: result,
             items,
         })
+    }
+
+    fn process_item_value(&self, item_value: &str) -> (String, String) {
+        let final_value: String = item_value
+            .trim_end_matches(|c: char| !c.is_alphabetic())
+            .to_string();
+        let addition = item_value[final_value.len()..].to_string();
+        (final_value, addition)
     }
 
     pub fn find_keywords(&self, text: &str) -> Vec<String> {
