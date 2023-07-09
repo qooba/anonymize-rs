@@ -14,6 +14,10 @@ fn test_regex_replace() -> Result<()> {
             "I like to eat FRUIT0 and FRUIT1 and FRUIT2",
         ),
         (
+            "I like to eat apples and apples and plums",
+            "I like to eat FRUIT0 and FRUIT0 and FRUIT1",
+        ),
+        (
             "{\"content\": \"I like to eat apples and bananas and plums\"}",
             "{\"content\": \"I like to eat FRUIT0 and FRUIT1 and FRUIT2\"}",
         ),

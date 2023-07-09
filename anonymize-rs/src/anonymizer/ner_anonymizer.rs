@@ -126,7 +126,7 @@ impl NerAnonymizer {
     ) -> Result<ReplaceResult> {
         let mut text = text_in.to_string();
         let mut offset: isize = 0;
-        let mut replaced_words = HashMap::new();
+        let mut replaced_words: HashMap<String, String> = HashMap::new();
         let mut replaced_words_counter = HashMap::new();
 
         for replacement in replacements {
@@ -138,23 +138,32 @@ impl NerAnonymizer {
                 return Err(anyhow!("Invalid range"));
             }
 
-            replaced_words_counter.insert(
-                word.to_string(),
-                if replaced_words_counter.contains_key(&word) {
-                    replaced_words_counter[&word] + 1
-                } else {
-                    0
-                },
-            );
-
-            let idx = replaced_words_counter[&word];
-            let word_rep = format!("{word}{idx}");
-
             let old_word = text[start..end].to_string();
+
+            let existing_item = replaced_words.iter().find(|(_, v)| *v == &old_word);
+            let mut word_rep = String::new();
+            match existing_item {
+                Some((k, _v)) => {
+                    word_rep.push_str(k);
+                }
+                None => {
+                    replaced_words_counter.insert(
+                        word.to_string(),
+                        if replaced_words_counter.contains_key(&word) {
+                            replaced_words_counter[&word] + 1
+                        } else {
+                            0
+                        },
+                    );
+                    let idx = replaced_words_counter[&word];
+                    word_rep.push_str(&word);
+                    word_rep.push_str(&idx.to_string());
+                }
+            }
+
             text.replace_range(start..end, &word_rep);
 
             replaced_words.insert(word_rep.to_string(), old_word);
-
             let len = end - start;
             offset += word_rep.len() as isize - len as isize;
         }

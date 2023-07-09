@@ -4,7 +4,9 @@ use crate::anonymizer::TrieNode;
 use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 use std::fs::File;
+use std::hash::Hash;
 use std::io::{self, BufRead};
+use tract_onnx::prelude::tract_itertools::Itertools;
 
 #[derive(Debug, Clone)]
 pub struct FlashTextAnonymizer {
@@ -46,7 +48,7 @@ impl FlashTextAnonymizer {
         let mut ch_indices = internal_text.char_indices();
         let mut start = 0;
 
-        let mut items = HashMap::new();
+        let mut items: HashMap<String, String> = HashMap::new();
         let mut idx = 0;
 
         let base_replacement = if replacement.is_some() {
@@ -60,14 +62,24 @@ impl FlashTextAnonymizer {
                 result.push_str(&internal_text[start..match_start]);
                 let mut rep = base_replacement.to_string();
                 rep.push_str(&idx.to_string());
-                result.push_str(&rep);
                 start = self.skip_to_word_boundary(
                     &internal_text,
                     match_start + ch.len_utf8(),
                     &mut ch_indices,
                 );
-                items.insert(rep, internal_text[match_start..start].to_string());
-                idx += 1;
+                let item_value = internal_text[match_start..start].to_string();
+                let existing_item = items.iter().find(|(_, v)| *v == &item_value);
+                match existing_item {
+                    Some((k, _v)) => {
+                        rep = k.to_string();
+                    }
+                    None => {
+                        items.insert(rep.to_string(), item_value);
+                        idx += 1;
+                    }
+                }
+
+                result.push_str(&rep);
             }
         }
         result.push_str(&internal_text[start..]);

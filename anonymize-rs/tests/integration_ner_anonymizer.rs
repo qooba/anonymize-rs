@@ -5,8 +5,8 @@ use anonymize_rs::{
 use anyhow::Result;
 
 async fn create_anonymizer(model_name: &str, lang: &str) -> Result<NerAnonymizer> {
-    let model_path = format!("./examples/{model_name}/model.onnx").to_string();
-    let tokenizer_path = format!("./examples/{model_name}/tokenizer.json").to_string();
+    let model_path = format!("../examples/{model_name}/model.onnx").to_string();
+    let tokenizer_path = format!("../examples/{model_name}/tokenizer.json").to_string();
 
     let path = format!("./tests/config/config_ner_{lang}.yaml").to_string();
     let config = AnonymizePipelineConfig::new(&path).await?;
@@ -33,8 +33,8 @@ async fn create_anonymizer(model_name: &str, lang: &str) -> Result<NerAnonymizer
 #[ignore]
 async fn test_ner_replace_pl() -> Result<()> {
     let test_cases = [
-        ("Jan Kowalski i Anna Kowalska mieszka w Krakowie na ulicy Warszawskiej.",
-         "B-nam_liv_person0 I-nam_liv_person0 i B-nam_liv_person1 I-nam_liv_person1 mieszka w B-nam_loc_gpe_city0 na ulicy B-nam_fac_road0."),
+        ("Jan Kowalski i Anna Kowalska mieszka w Krakowie na ulicy Warszawskiej. Jan Kowalski jest programistą",
+         "B-nam_liv_person0 I-nam_liv_person0 i B-nam_liv_person1 I-nam_liv_person1 mieszka w B-nam_loc_gpe_city0 na ulicy B-nam_fac_road0. B-nam_liv_person0 I-nam_liv_person0 jest programistą"),
         ("{\"content\": \"Jan Kowalski i Anna Kowalska mieszka w Krakowie na ulicy Warszawskiej.\"}",
          "{\"content\": \"B-nam_liv_person0 I-nam_liv_person0 i B-nam_liv_person1 I-nam_liv_person1 mieszka w B-nam_loc_gpe_city0 na ulicy B-nam_fac_road0.\"}")
     ];
@@ -59,6 +59,10 @@ async fn test_ner_replace_en() -> Result<()> {
         (
             "My name is Sarah and I live in London",
             "My name is B-PER0 and I live in B-LOC0",
+        ),
+        (
+            "My name is Sarah and I live in London. I like London.",
+            "My name is B-PER0 and I live in B-LOC0. I like B-LOC0.",
         ),
         (
             "{\"content\":\"My name is Sarah and I live in London\"}",
