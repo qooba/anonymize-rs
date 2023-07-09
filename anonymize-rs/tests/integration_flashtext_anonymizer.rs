@@ -19,7 +19,7 @@ async fn test_flashtext_replace() -> Result<()> {
             "I like to eat FRUIT0 and FRUIT0 and FRUIT1",
         ),
         (
-            "{\"content\": \"I like to eat apples and bananas and plums\"}",
+            "{\"content\": \"I like to eat apples and bananas and plum\"}",
             "{\"content\": \"I like to eat FRUIT0 and FRUIT1 and FRUIT2\"}",
         ),
     ];

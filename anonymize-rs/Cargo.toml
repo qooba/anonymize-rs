@@ -3,7 +3,7 @@ name = "anonymize_rs"
 version = "0.0.1"
 edition = "2021"
 repository = "https://github.com/qooba/anonymize-rs"
-description = "anonymize-rs"
+description = "Data anonymization library"
 license = "Apache-2.0"
 
 [dependencies]
