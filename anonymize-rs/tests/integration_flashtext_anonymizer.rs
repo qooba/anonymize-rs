@@ -30,7 +30,7 @@ async fn test_flashtext_replace() -> Result<()> {
         println!("{:?}", keywords);
         assert_eq!(keywords[0], "apple");
 
-        let res = flash_text.replace_keywords(text, Some("FRUIT"))?;
+        let res = flash_text.replace_keywords(text, Some("FRUIT"), None)?;
         assert_eq!(&res.text, &test_case.1);
 
         let d_res = flash_text.deanonymize(res);
@@ -49,7 +49,7 @@ fn test_flashtest_replace_file1() -> Result<()> {
     println!("{:?}", keywords);
     assert_eq!(keywords[0], "apple");
 
-    let res = flash_text.replace_keywords(text, Some("FRUIT"))?;
+    let res = flash_text.replace_keywords(text, Some("FRUIT"), None)?;
     println!("{:?}", res);
 
     assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1");
@@ -66,7 +66,7 @@ fn test_flashtest_replace_file2() -> Result<()> {
     println!("{:?}", keywords);
     assert_eq!(keywords[0], "apple");
 
-    let res = flash_text.replace_keywords(text, None)?;
+    let res = flash_text.replace_keywords(text, None, None)?;
     println!("{:?}", res);
 
     assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1");

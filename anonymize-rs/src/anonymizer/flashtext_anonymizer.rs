@@ -41,14 +41,22 @@ impl FlashTextAnonymizer {
         Ok(())
     }
 
-    pub fn replace_keywords(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
+    pub fn replace_keywords(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult> {
         let mut internal_text = text.to_string();
         internal_text.push_str("  ");
         let mut result = String::new();
         let mut ch_indices = internal_text.char_indices();
         let mut start = 0;
 
-        let mut items: HashMap<String, String> = HashMap::new();
+        let mut items: HashMap<String, String> = match items {
+            Some(it) => it,
+            None => HashMap::new(),
+        };
         let mut idx = 0;
 
         let base_replacement = if replacement.is_some() {
@@ -151,7 +159,12 @@ impl FlashTextAnonymizer {
 }
 
 impl Anonymizer for FlashTextAnonymizer {
-    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
-        self.replace_keywords(text, replacement)
+    fn anonymize(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult> {
+        self.replace_keywords(text, replacement, items)
     }
 }

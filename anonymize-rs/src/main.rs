@@ -59,7 +59,7 @@ pub async fn anonymize_post(
     anonymize_request: web::Json<AnonymizeRequest>,
     anonymizer_pipeline: web::Data<AnonymizePipeline>,
 ) -> Result<impl Responder, Box<dyn Error>> {
-    let resp = anonymizer_pipeline.anonymize(&anonymize_request.text, None)?;
+    let resp = anonymizer_pipeline.anonymize(&anonymize_request.text, None, None)?;
     Ok(web::Json(resp))
 }
 
@@ -67,7 +67,7 @@ pub async fn anonymize_get(
     anonymize_request: web::Query<AnonymizeRequest>,
     anonymizer_pipeline: web::Data<AnonymizePipeline>,
 ) -> Result<impl Responder, Box<dyn Error>> {
-    let resp = anonymizer_pipeline.anonymize(&anonymize_request.text, None)?;
+    let resp = anonymizer_pipeline.anonymize(&anonymize_request.text, None, None)?;
     Ok(web::Json(resp))
 }
 

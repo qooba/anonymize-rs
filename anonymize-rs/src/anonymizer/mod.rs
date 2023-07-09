@@ -5,6 +5,7 @@ use crate::config::{AnonymizePipelineConfig, AnonymizerConfig};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::hash::Hash;
 pub mod flashtext_anonymizer;
 pub mod ner_anonymizer;
 pub mod regex_anonymizer;
@@ -16,7 +17,12 @@ pub struct ReplaceResult {
 }
 
 pub trait Anonymizer: AnonymizerClone {
-    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult>;
+    fn anonymize(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult>;
 
     fn deanonymize(&self, input: ReplaceResult) -> String {
         let mut result = input.text;
@@ -107,21 +113,32 @@ impl AnonymizePipeline {
 }
 
 impl Anonymizer for AnonymizePipeline {
-    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
+    fn anonymize(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult> {
         let mut replace_result = ReplaceResult {
             text: text.to_string(),
             items: HashMap::new(),
         };
 
+        let mut result_items = HashMap::new();
         self.anonymizers
             .iter()
             .try_for_each(|anonymizer| -> Result<()> {
-                let result = anonymizer.anonymize(&replace_result.text, replacement)?;
+                let result = anonymizer.anonymize(
+                    &replace_result.text,
+                    replacement,
+                    Some(result_items.clone()),
+                )?;
                 replace_result.text = result.text;
-                replace_result.items.extend(result.items);
+                result_items = result.items;
                 Ok(())
             })?;
 
+        replace_result.items = result_items;
         Ok(replace_result)
     }
 }

@@ -45,7 +45,7 @@ async fn test_ner_replace_pl() -> Result<()> {
 
     for test_case in test_cases {
         let text = test_case.0;
-        let res = ner_anonymizer.replace_matches(text, None)?;
+        let res = ner_anonymizer.replace_matches(text, None, None)?;
         assert_eq!(res.text, test_case.1);
     }
     Ok(())
@@ -74,7 +74,7 @@ async fn test_ner_replace_en() -> Result<()> {
     let ner_anonymizer = create_anonymizer(model_name, lang).await?;
     for test_case in test_cases {
         let text = test_case.0;
-        let res = ner_anonymizer.replace_matches(text, None)?;
+        let res = ner_anonymizer.replace_matches(text, None, None)?;
         assert_eq!(res.text, test_case.1);
     }
     Ok(())

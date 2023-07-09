@@ -46,7 +46,12 @@ impl NerAnonymizer {
         })
     }
 
-    pub fn replace_matches(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
+    pub fn replace_matches(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult> {
         if let Some(_rep) = replacement {
             todo!("Functionality not implemented");
         }
@@ -116,17 +121,21 @@ impl NerAnonymizer {
                 //dbg!(r4);
             });
 
-        self.replace_words(text, replacements)
+        self.replace_words(text, replacements, items)
     }
 
     fn replace_words(
         &self,
         text_in: &str,
         replacements: Vec<(usize, usize, String)>,
+        items: Option<HashMap<String, String>>,
     ) -> Result<ReplaceResult> {
         let mut text = text_in.to_string();
         let mut offset: isize = 0;
-        let mut replaced_words: HashMap<String, String> = HashMap::new();
+        let mut replaced_words: HashMap<String, String> = match items {
+            Some(it) => it,
+            None => HashMap::new(),
+        };
         let mut replaced_words_counter = HashMap::new();
 
         for replacement in replacements {
@@ -176,7 +185,12 @@ impl NerAnonymizer {
 }
 
 impl Anonymizer for NerAnonymizer {
-    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
-        self.replace_matches(text, replacement)
+    fn anonymize(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult> {
+        self.replace_matches(text, replacement, items)
     }
 }

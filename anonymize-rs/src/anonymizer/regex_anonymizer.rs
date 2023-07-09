@@ -38,9 +38,13 @@ impl RegexAnonymizer {
         &self,
         text: &str,
         replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
     ) -> Result<ReplaceResult> {
         let mut result = text.to_string();
-        let mut items: HashMap<String, String> = HashMap::new();
+        let mut items: HashMap<String, String> = match items {
+            Some(it) => it,
+            None => HashMap::new(),
+        };
         let mut idx = 0;
 
         let base_replacement = if replacement.is_some() {
@@ -91,7 +95,12 @@ impl RegexAnonymizer {
 }
 
 impl Anonymizer for RegexAnonymizer {
-    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
-        self.replace_regex_matches(text, replacement)
+    fn anonymize(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult> {
+        self.replace_regex_matches(text, replacement, items)
     }
 }
