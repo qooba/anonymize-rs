@@ -1,0 +1,19 @@
+[package]
+name = "anonymize-py"
+version = "0.0.1"
+edition = "2021"
+repository = "https://github.com/qooba/anonymize-rs"
+description = "anonymize-rs"
+license = "Apache-2.0"
+
+[lib]
+name = "anonymize_py"
+crate-type = ["cdylib"]
+
+[build]
+rustflags = ["-C", "target-cpu=native"]
+
+[dependencies]
+anonymize_rs = { path = "../anonymize-rs" }
+pyo3 = { version = "0.19.1", features = ["extension-module"] }
+tokio = { version = "1.20.0", features = ["full"] }

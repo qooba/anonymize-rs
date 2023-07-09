@@ -1,22 +1,12 @@
-use actix_files as fs;
 use actix_web::middleware::Logger;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use anonymize_rs::anonymizer::{AnonymizePipeline, Anonymizer, ReplaceResult};
 use anonymize_rs::config::AnonymizePipelineConfig;
 use anyhow::Result;
-use bytes::{Bytes, BytesMut};
-use clap::{Parser, Subcommand};
-use models::{AnonymizeRequest, DeAnonymizeResponse};
-use once_cell::sync::OnceCell;
-use std::collections::HashMap;
+use clap::Parser;
+use models::AnonymizeRequest;
 use std::error::Error;
 use std::io::{self, BufRead};
-use std::path::PathBuf;
-use std::sync::mpsc::{sync_channel, SyncSender};
-use std::sync::Arc;
-use std::thread;
-use tokio::sync::mpsc::{channel, Receiver};
-use tokio::sync::Mutex;
 
 pub mod anonymizer;
 pub mod config;
@@ -69,7 +59,7 @@ pub async fn anonymize_post(
     anonymize_request: web::Json<AnonymizeRequest>,
     anonymizer_pipeline: web::Data<AnonymizePipeline>,
 ) -> Result<impl Responder, Box<dyn Error>> {
-    let resp = anonymizer_pipeline.anonymize(&anonymize_request.text, None)?;
+    let resp = anonymizer_pipeline.anonymize(&anonymize_request.text, None, None)?;
     Ok(web::Json(resp))
 }
 
@@ -77,16 +67,15 @@ pub async fn anonymize_get(
     anonymize_request: web::Query<AnonymizeRequest>,
     anonymizer_pipeline: web::Data<AnonymizePipeline>,
 ) -> Result<impl Responder, Box<dyn Error>> {
-    let resp = anonymizer_pipeline.anonymize(&anonymize_request.text, None)?;
+    let resp = anonymizer_pipeline.anonymize(&anonymize_request.text, None, None)?;
     Ok(web::Json(resp))
 }
 
 pub async fn deanonymize(
     anonymize_request: web::Json<ReplaceResult>,
+    anonymizer_pipeline: web::Data<AnonymizePipeline>,
 ) -> Result<impl Responder, Box<dyn Error>> {
-    let resp = DeAnonymizeResponse {
-        text: "".to_string(),
-    };
+    let resp = anonymizer_pipeline.deanonymize(anonymize_request.0);
     Ok(web::Json(resp))
 }
 
@@ -119,8 +108,11 @@ async fn main() -> std::io::Result<()> {
             .run()
             .await
         }
-        AnonymizeCli::File(file_args) => Ok(()),
-        AnonymizeCli::Stdin(stdin_args) => {
+        AnonymizeCli::File(_file_args) => {
+            todo!("FEATURE TO IMPLEMENT");
+        }
+        AnonymizeCli::Stdin(_stdin_args) => {
+            todo!("FEATURE TO IMPLEMENT");
             let stdin = io::stdin();
             let mut lines = stdin.lock().lines();
 

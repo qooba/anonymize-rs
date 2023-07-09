@@ -1,24 +1,17 @@
 use crate::anonymizer::{Anonymizer, ReplaceResult};
 use anyhow::{anyhow, Result};
-use ndarray::s;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fs::File;
-use std::hash::Hash;
-use std::io::BufReader;
+use std::path::Path;
 use std::time::Instant;
-use std::{
-    path::{Path, PathBuf},
-    str::FromStr,
-};
 use tokenizers::tokenizer::Tokenizer;
 use tract_ndarray::Axis;
-use tract_onnx::prelude::tract_itertools::enumerate;
 use tract_onnx::prelude::*;
+
+type NerModel = SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>;
 
 #[derive(Debug, Clone)]
 pub struct NerAnonymizer {
-    model: SimplePlan<TypedFact, Box<dyn TypedOp>, Graph<TypedFact, Box<dyn TypedOp>>>,
+    model: NerModel,
     tokenizer: Tokenizer,
     id2label: HashMap<String, (String, bool)>,
     token_type_ids_included: Option<bool>,
@@ -53,7 +46,12 @@ impl NerAnonymizer {
         })
     }
 
-    pub fn replace_matches(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
+    pub fn replace_matches(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult> {
         if let Some(_rep) = replacement {
             todo!("Functionality not implemented");
         }
@@ -123,17 +121,21 @@ impl NerAnonymizer {
                 //dbg!(r4);
             });
 
-        self.replace_words(text, replacements)
+        self.replace_words(text, replacements, items)
     }
 
     fn replace_words(
         &self,
         text_in: &str,
         replacements: Vec<(usize, usize, String)>,
+        items: Option<HashMap<String, String>>,
     ) -> Result<ReplaceResult> {
         let mut text = text_in.to_string();
         let mut offset: isize = 0;
-        let mut replaced_words = HashMap::new();
+        let mut replaced_words: HashMap<String, String> = match items {
+            Some(it) => it,
+            None => HashMap::new(),
+        };
         let mut replaced_words_counter = HashMap::new();
 
         for replacement in replacements {
@@ -145,23 +147,32 @@ impl NerAnonymizer {
                 return Err(anyhow!("Invalid range"));
             }
 
-            replaced_words_counter.insert(
-                word.to_string(),
-                if replaced_words_counter.contains_key(&word) {
-                    replaced_words_counter[&word] + 1
-                } else {
-                    0
-                },
-            );
-
-            let idx = replaced_words_counter[&word];
-            let word_rep = format!("{word}{idx}");
-
             let old_word = text[start..end].to_string();
+
+            let existing_item = replaced_words.iter().find(|(_, v)| *v == &old_word);
+            let mut word_rep = String::new();
+            match existing_item {
+                Some((k, _v)) => {
+                    word_rep.push_str(k);
+                }
+                None => {
+                    replaced_words_counter.insert(
+                        word.to_string(),
+                        if replaced_words_counter.contains_key(&word) {
+                            replaced_words_counter[&word] + 1
+                        } else {
+                            0
+                        },
+                    );
+                    let idx = replaced_words_counter[&word];
+                    word_rep.push_str(&word);
+                    word_rep.push_str(&idx.to_string());
+                }
+            }
+
             text.replace_range(start..end, &word_rep);
 
             replaced_words.insert(word_rep.to_string(), old_word);
-
             let len = end - start;
             offset += word_rep.len() as isize - len as isize;
         }
@@ -174,7 +185,12 @@ impl NerAnonymizer {
 }
 
 impl Anonymizer for NerAnonymizer {
-    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
-        self.replace_matches(text, replacement)
+    fn anonymize(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult> {
+        self.replace_matches(text, replacement, items)
     }
 }

@@ -38,9 +38,13 @@ impl RegexAnonymizer {
         &self,
         text: &str,
         replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
     ) -> Result<ReplaceResult> {
         let mut result = text.to_string();
-        let mut items = HashMap::new();
+        let mut items: HashMap<String, String> = match items {
+            Some(it) => it,
+            None => HashMap::new(),
+        };
         let mut idx = 0;
 
         let base_replacement = if replacement.is_some() {
@@ -52,17 +56,30 @@ impl RegexAnonymizer {
         for pattern in &self.regex_patterns {
             let mut it = pattern.find_iter(&result).enumerate().peekable();
             if it.peek().is_some() {
-                let mut rep = base_replacement.to_string();
-                rep.push_str(&idx.to_string());
+                let mut rep = String::new();
                 let mut new = String::with_capacity(result.len());
                 let mut last_match = 0;
                 for (_i, m) in it {
                     let start = m.start();
                     new.push_str(&result[last_match..start]);
-                    new.push_str(&rep.to_string());
                     last_match = m.end();
-                    items.insert(rep.to_string(), result[start..last_match].to_string());
-                    idx += 1;
+
+                    let item_value = result[start..last_match].to_string();
+
+                    let existing_item = items.iter().find(|(_, v)| *v == &item_value);
+                    match existing_item {
+                        Some((k, _v)) => {
+                            rep = k.to_string();
+                        }
+                        None => {
+                            rep.push_str(&base_replacement);
+                            rep.push_str(&idx.to_string());
+                            items.insert(rep.to_string(), item_value);
+                            idx += 1;
+                        }
+                    }
+
+                    new.push_str(&rep.to_string());
                 }
                 new.push_str(&result[last_match..]);
 
@@ -78,7 +95,12 @@ impl RegexAnonymizer {
 }
 
 impl Anonymizer for RegexAnonymizer {
-    fn anonymize(&self, text: &str, replacement: Option<&str>) -> Result<ReplaceResult> {
-        self.replace_regex_matches(text, replacement)
+    fn anonymize(
+        &self,
+        text: &str,
+        replacement: Option<&str>,
+        items: Option<HashMap<String, String>>,
+    ) -> Result<ReplaceResult> {
+        self.replace_regex_matches(text, replacement, items)
     }
 }

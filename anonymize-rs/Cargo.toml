@@ -1,0 +1,23 @@
+[package]
+name = "anonymize_rs"
+version = "0.0.1"
+edition = "2021"
+repository = "https://github.com/qooba/anonymize-rs"
+description = "anonymize-rs"
+license = "Apache-2.0"
+
+[dependencies]
+actix-web = { version="4", features=["rustls"]}
+tokio = { version = "1.20.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+anyhow = "1.0.71"
+clap = { version = "4.1.8", features = ["derive"] }
+regex = "1.8.4"
+url = "2.4.0"
+thiserror = "1.0"
+reqwest = { version = "0.11", default-features=false, features = ["json", "rustls-tls"] }
+tract-onnx = "0.20.7"
+tokenizers = { version="0.13.3", default-features=false, features=["onig"]}
+ndarray = "0.15.6"
+env_logger = "0.10.0"

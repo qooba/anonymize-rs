@@ -8,12 +8,30 @@ fn test_regex_replace() -> Result<()> {
     regex_anonymizer.add_regex_pattern(r"\bbanana\w*\b")?;
     regex_anonymizer.add_regex_pattern(r"\bplum\w*\b")?;
 
-    let text = "I like to eat apples and bananas and plums";
+    let test_cases = [
+        (
+            "I like to eat apples and bananas and plums",
+            "I like to eat FRUIT0 and FRUIT1 and FRUIT2",
+        ),
+        (
+            "I like to eat apples and apples and plums",
+            "I like to eat FRUIT0 and FRUIT0 and FRUIT1",
+        ),
+        (
+            "{\"content\": \"I like to eat apples and bananas and plums\"}",
+            "{\"content\": \"I like to eat FRUIT0 and FRUIT1 and FRUIT2\"}",
+        ),
+    ];
 
-    let res = regex_anonymizer.replace_regex_matches(text, Some("FRUIT"))?;
-    println!("{:?}", res);
+    for test_case in test_cases {
+        let text = test_case.0;
 
-    assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2");
+        let res = regex_anonymizer.replace_regex_matches(text, Some("FRUIT"), None)?;
+        println!("{:?}", res);
+
+        assert_eq!(res.text, test_case.1);
+    }
+
     Ok(())
 }
 
@@ -24,7 +42,7 @@ fn test_regex_replace_file1() -> Result<()> {
 
     let text = "I like to eat apples and bananas and plums";
 
-    let res = regex_anonymizer.replace_regex_matches(text, Some("FRUIT"))?;
+    let res = regex_anonymizer.replace_regex_matches(text, Some("FRUIT"), None)?;
     println!("{:?}", res);
 
     assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2");
@@ -38,7 +56,7 @@ fn test_regex_replace_file2() -> Result<()> {
 
     let text = "I like to eat apples and bananas and plums";
 
-    let res = regex_anonymizer.replace_regex_matches(text, None)?;
+    let res = regex_anonymizer.replace_regex_matches(text, None, None)?;
     println!("{:?}", res);
 
     assert_eq!(res.text, "I like to eat FRUIT0 and FRUIT1 and FRUIT2");

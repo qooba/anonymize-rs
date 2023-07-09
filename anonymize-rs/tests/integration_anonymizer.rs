@@ -36,11 +36,11 @@ async fn test_replace_config() -> Result<()> {
 
     let config = AnonymizePipelineConfig::new(&path).await?;
     let anonymize_pipeline = AnonymizePipeline::new(config)?;
-    let res = anonymize_pipeline.anonymize(text, None)?;
+    let res = anonymize_pipeline.anonymize(text, None, None)?;
     println!("{:?}", res);
     assert_eq!(
         res.text,
-        "I like to eat FRUIT_FLASH0 and FRUIT_FLASH1 and FRUIT_REGEX0 "
+        "I like to eat FRUIT_FLASH0 and FRUIT_FLASH1 and FRUIT_REGEX0"
     );
 
     Ok(())
