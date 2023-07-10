@@ -17,4 +17,4 @@ RUN cargo install --target x86_64-unknown-linux-musl --path .
 FROM scratch
 COPY --from=builder /usr/local/cargo/bin/anonymize_rs .
 USER 1000
-ENTRYPOINT ["./anonymize_rs"]
+ENTRYPOINT ["./anonymize-rs"]

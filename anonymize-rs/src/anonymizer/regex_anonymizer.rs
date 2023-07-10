@@ -56,23 +56,20 @@ impl RegexAnonymizer {
         for pattern in &self.regex_patterns {
             let mut it = pattern.find_iter(&result).enumerate().peekable();
             if it.peek().is_some() {
-                let mut rep = String::new();
                 let mut new = String::with_capacity(result.len());
                 let mut last_match = 0;
                 for (_i, m) in it {
                     let start = m.start();
                     new.push_str(&result[last_match..start]);
                     last_match = m.end();
-
+                    let mut rep: String = base_replacement.to_string();
                     let item_value = result[start..last_match].to_string();
-
                     let existing_item = items.iter().find(|(_, v)| *v == &item_value);
                     match existing_item {
                         Some((k, _v)) => {
                             rep = k.to_string();
                         }
                         None => {
-                            rep.push_str(&base_replacement);
                             rep.push_str(&idx.to_string());
                             items.insert(rep.to_string(), item_value);
                             idx += 1;
