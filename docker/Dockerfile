@@ -15,6 +15,6 @@ RUN cargo install --target x86_64-unknown-linux-musl --path .
 
 # Bundle Stage
 FROM scratch
-COPY --from=builder /usr/local/cargo/bin/anonymize_rs .
+COPY --from=builder /usr/local/cargo/bin/anonymize-rs .
 USER 1000
 ENTRYPOINT ["./anonymize-rs"]
