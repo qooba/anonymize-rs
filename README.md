@@ -205,7 +205,7 @@ Response:
 
 You can simply run anonymization server using docker image:
 ```
-docker run -it -v $(pwd)/config.yaml:config.yaml -p 8080:8080 qooba/anonymize-rs server --host 0.0.0.0 --port 8080 --config config.yaml
+docker run -it -v $(pwd):/app -p 8080:8080 qooba/anonymize-rs server --host 0.0.0.0 --port 8080 --config config.yaml
 ```
 
 ## Python
