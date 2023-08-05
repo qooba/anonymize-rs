@@ -14,6 +14,6 @@ crate-type = ["cdylib"]
 rustflags = ["-C", "target-cpu=native"]
 
 [dependencies]
-anonymize-rs = { path = "../anonymize-rs" }
+anonymize_rs = { path = "../anonymize-rs" }
 pyo3 = { version = "0.19.1", features = ["extension-module"] }
 tokio = { version = "1.20.0", features = ["full"] }
