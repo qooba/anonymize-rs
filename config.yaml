@@ -1,0 +1,15 @@
+pipeline:
+  - kind: ner
+    model_path: ./models/dslim/model.onnx
+    tokenizer_path: ./models/dslim/tokenizer.json
+    token_type_ids_included: true
+    id2label:
+      "0": ["O", false]
+      "1": ["B-MISC", true]
+      "2": ["I-MISC", true]
+      "3": ["B-PER", true]
+      "4": ["I-PER", true]
+      "5": ["B-ORG", true]
+      "6": ["I-ORG", true]
+      "7": ["B-LOC", true]
+      "8": ["I-LOC", true]
