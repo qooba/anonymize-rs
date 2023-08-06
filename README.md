@@ -72,6 +72,7 @@ pipeline:
   - kind: ner
     model_path: ./examples/dslim/model.onnx
     tokenizer_path: ./examples/dslim/tokenizer.json
+    token_type_ids_included: true
     id2label:
       "0": ["O", false]
       "1": ["B-MISC", true]
@@ -217,7 +218,7 @@ pip install anonymizers
 ```python
 >>> from anonymizers import Ner, Regex, FlashText
 >>> id2label={"0":("O",False),"1": ("B-MISC", True),"2": ("I-MISC", True),"3": ("B-PER", True),"4": ("I-PER", True),"5": ("B-ORG", True),"6": ("I-ORG", True),"7": ("B-LOC", True),"8": ("I-LOC", True)}
->>> ner_anonymizer = Ner("./dslim/model.onnx","./dslim/tokenizer.json", id2label)
+>>> ner_anonymizer = Ner("./dslim/model.onnx","./dslim/tokenizer.json", id2label, True)
 MODEL LOADED: 3.25s
 TOKENIZER LOADED: 14.10ms
 >>> ner_anonymizer.anonymize("My name is Sarah and I live in London. I like London.")
